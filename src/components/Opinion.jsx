@@ -12,6 +12,7 @@ export function Opinion({ opinion: { id, title, body, userName, votes } }) {
     await downvoteOpinion(id);
   }
 
+  // gaperlu param kedua karna ya gada manage state apa apa disini
   const [upvoteFormState, upvoteFormAction, upvotePending]= useActionState(upvoteAction);
   const [downvoteFormState, downvoteFormAction, downvotePending] = useActionState(downvoteAction);
 
