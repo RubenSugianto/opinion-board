@@ -1,14 +1,27 @@
-import { use, useActionState } from 'react';
+import { use, useActionState, useOptimistic } from 'react';
 import { OpinionsContext } from '../store/opinions-context';
 
 export function Opinion({ opinion: { id, title, body, userName, votes } }) {
   const { upvoteOpinion, downvoteOpinion } = use(OpinionsContext);
 
+  // setVotesOptimistically itu yang harus dipanggil untuk menjalankan param kedua di useOptimistic
+  // prevVotes selalu ada sebagai param awal, sisanya ya sesuai yg kita tambahin
+  const [optimisticVotes, setVotesOptimistically] = useOptimistic(
+    // setVotesOptimistically itu dipanggil, jalanin function di param kedua, trs optimisticVotes valunya ada sementara
+    // lalu setelah upvoteOpinion(id) atau downvoteOpinion(id) dijalnin, votes (param pertama), value aslinya bakal keupdate
+    votes,
+    (prevVotes, mode) => (mode === 'up' ? prevVotes + 1 : prevVotes - 1)
+  );
+
   async function upvoteAction() {
+    // function akan execute dan menghasilkan value optimisticVotes baru
+    // 
+    setVotesOptimistically('up');
     await upvoteOpinion(id);
   }
 
   async function downvoteAction() {
+    setVotesOptimistically('down');
     await downvoteOpinion(id);
   }
 
@@ -42,7 +55,7 @@ export function Opinion({ opinion: { id, title, body, userName, votes } }) {
           </svg>
         </button>
 
-        <span>{votes}</span>
+        <span>{optimisticVotes}</span>
 
         <button formAction={downvoteFormAction} disabled={upvotePending || downvotePending}>
           <svg
